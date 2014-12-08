@@ -53,10 +53,10 @@ public class listOfTracks extends JPanel {
 			File src = new File(file.getAbsolutePath());
 			try {
 				ID3v1 tag = new MP3File(src).getID3v1Tag();
-				songList.add(tag.getSongTitle());
+				songList.add(tag.getTitle());
 				artistList.add(tag.getArtist());
 				albumList.add(tag.getAlbum());
-				System.out.println(tag.getSongTitle());
+				System.out.println(tag.getTitle());
 			} catch (IOException | TagException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -109,7 +109,7 @@ public class listOfTracks extends JPanel {
 			File src = new File(file.getAbsolutePath());
 			try {
 				ID3v1 tag = new MP3File(src).getID3v1Tag();
-				songList.add(tag.getSongTitle());
+				songList.add(tag.getTitle());
 				artistList.add(tag.getArtist());
 				albumList.add(tag.getAlbum());
 				System.out.println(tag.getArtist());

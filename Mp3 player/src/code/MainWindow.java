@@ -1,24 +1,31 @@
 package code;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
-import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.advanced.AdvancedPlayer;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.JButton;
-import java.awt.Color;
 
 public class MainWindow {
 
-	private Buttons buttons;
 	private JFrame frame;
+	private listOfTracks tracks = new listOfTracks();
+	private boolean stop;
+	private SwingWorker<Void, Void> sw;
+	private Thread t;
 
 	/**
 	 * Launch the application.
@@ -61,43 +68,52 @@ public class MainWindow {
 		JLabel lblMpPlayer = new JLabel("MP3 PLAYER");
 		johnPanel.add(lblMpPlayer);
 		
-		JButton btnRwd = new JButton("RWD");
+		JButton btnRwd = new JButton("<<");
 		johnPanel.add(btnRwd);
 		
 		JButton btnPlay = new JButton("PLAY");
+		btnPlay.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//play song in the background thread
+				if(tracks.getCurrentSelectedSong()!=null){
+					RunSong rs = new RunSong(tracks.getCurrentSelectedSong());
+					t = new Thread(rs);
+					t.start();
+				}
+			
+
+			}
+		});
 		johnPanel.add(btnPlay);
-		
-		JButton btnFwd = new JButton("FWD");
+		JButton btnFwd = new JButton(">>");
 		johnPanel.add(btnFwd);
 		
 		JButton btnStop = new JButton("STOP");
+		btnStop.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//stop song
+				System.out.println("Stopping song");
+				t.stop();
+				
+						
+			}
+		});	
+		
 		johnPanel.add(btnStop);
 
 		johnPanel.setBackground(SystemColor.activeCaption);
 		frame.getContentPane().add(johnPanel, "cell 0 0,grow");
-
-		//play song in the background thread
-		SwingWorker<Void, Void> sw = new SwingWorker<Void, Void>(){
-
-			@Override
-			protected Void doInBackground() throws Exception {
-				buttons = new Buttons();
-				buttons.playSong();
-				return null;
-			}
-
-			
-		};
-		sw.execute();
-		
-		buttons.stopSong();
 
 		JPanel splitPanel = new JPanel();
 		frame.getContentPane().add(splitPanel, "cell 0 1,grow");
 		splitPanel.setLayout(new MigLayout("", "[grow,left][grow,right]", "[grow,center]"));
 
 		JTabbedPane seanTabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		listOfTracks tracks = new listOfTracks();
+		
 		songsSetup(tracks);
 		seanTabbedPane.add("Artists", tracks.getArtistPanel());
 		seanTabbedPane.add("Songs", tracks.getSongPanel());
@@ -115,6 +131,32 @@ public class MainWindow {
 
 		tracks.setArtistPanel();
 		tracks.setSongPanel();
+	}
+	public class RunSong implements Runnable{
+		
+		private String song;
+		
+		public RunSong(String song) {
+			
+			this.song = song;
+		}
+		@Override
+		public void run() {
+			
+
+			try {
+				FileInputStream fis =  new FileInputStream("res\\music\\" 
+						+ song + ".mp3");
+				AdvancedPlayer player = new AdvancedPlayer(fis);
+				player.play();
+			} catch (FileNotFoundException | JavaLayerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			
+		}
+		
 	}
 
 }
